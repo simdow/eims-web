@@ -10,13 +10,8 @@
               clearable
               style="width: 350px;margin-right:10px"
             />
-            <el-button icon="el-icon-search" type="primary">搜索</el-button>
-
-            <el-button-group style="margin-left: 50px">
-              <el-button type="primary" icon="el-icon-search">
-                高级搜索
-              </el-button>
-            </el-button-group>
+            <el-button icon="el-icon-search" type="primary">{{ !expandMore ? '搜索' : '高级搜索' }}</el-button>
+            <el-button :icon="expandMore ? 'el-icon-arrow-up' : 'el-icon-arrow-down'" type="text" @click="expandMore = !expandMore;">{{ expandMore ? '高级搜索 - 收起' : '高级搜索 - 展开' }}</el-button>
 
             <el-button-group style="margin-left: 50px">
               <el-button type="primary" icon="el-icon-plus">
@@ -26,8 +21,21 @@
                 批量删除
               </el-button>
             </el-button-group>
-
           </el-form-item>
+
+          <div>
+            <template v-if="expandMore">
+              <el-form :inline="true">
+                <el-form-item label="姓名" prop="name">
+                  <el-input v-model="query.name" clearable style="width: 350px;margin-right:10px" />
+                </el-form-item>
+                <el-form-item label="性别" prop="sex">
+                  <el-input v-model="query.name" clearable style="width: 350px;margin-right:10px" />
+                </el-form-item>
+              </el-form>
+            </template>
+          </div>
+
         </el-form>
       </div>
     </div>
@@ -60,7 +68,6 @@
 
 <script>
 import { mapGetters } from 'vuex'
-
 export default {
   name: 'Dashboard',
   computed: {
@@ -70,6 +77,7 @@ export default {
   },
   data() {
     return {
+      expandMore: false, // 是否展开更多搜索条件
       // TODO: Department id name 映射
       query: {
         user_id: '',
