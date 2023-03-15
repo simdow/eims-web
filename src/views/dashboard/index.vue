@@ -3,48 +3,28 @@
     <div>
       <div style="display: flex;justify-content: space-between;" />
       <div>
-        <el-form ref="emp" :model="emp" :rules="rules" @submit.native.prevent>
-          <el-form-item label="name">
+        <el-form ref="emp">
+          <el-form-item label="职员编号">
             <el-input
-              v-model="search_name"
-              placeholder="请输入员工姓名进行搜索，可以直接回车搜索..."
+              v-model="query.user_id"
               clearable
-              style="width :350px;margin-right:10px"
+              style="width: 350px;margin-right:10px"
             />
-            <el-button-group>
-              <el-button icon="el-icon-search" type="primary">搜索</el-button>
-              <el-button icon="el-icon-refresh" type="info">重置</el-button>
-            </el-button-group>
-            <el-button-group>
-              <el-button style="margin-left: 50px;" type="primary">
-                <i
-                  :class="showAdvanceSearchView?'fa fa-angle-double-up':'fa fa-angle-double-down'"
-                  aria-hidden="true"
-                />
+            <el-button icon="el-icon-search" type="primary">搜索</el-button>
+
+            <el-button-group style="margin-left: 50px">
+              <el-button type="primary" icon="el-icon-search">
                 高级搜索
               </el-button>
-
-              <el-button style="margin-left:50px;" type="primary">
-                <i
-                  :class="showDateSearchView?'fa fa-angle-double-up':'fa fa-angle-double-down'"
-                  aria-hidden="true"
-                />
-                <!--??-->
-                入职日期
-              </el-button>
-
             </el-button-group>
 
-            <el-button-group style="margin-left: 50px">
-              <el-button type="danger" icon="el-icon-delete" :disabled="!multipleSelectionFlag" @click="popDelete">
-                批量选择
-              </el-button>
-            </el-button-group>
             <el-button-group style="margin-left: 50px">
               <el-button type="primary" icon="el-icon-plus">
-                添加用户
+                添加
               </el-button>
-
+              <el-button type="danger" icon="el-icon-delete">
+                批量删除
+              </el-button>
             </el-button-group>
 
           </el-form-item>
@@ -90,7 +70,18 @@ export default {
   },
   data() {
     return {
-      search_name: '',
+      // TODO: Department id name 映射
+      query: {
+        user_id: '',
+        name: '',
+        sex: '',
+        age: '',
+        position: '',
+        marry: '',
+        education: '',
+        join_time: '',
+        department_name: ''
+      },
       tableData: [
         {
           'user_id': 1,
