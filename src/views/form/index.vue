@@ -1,85 +1,131 @@
 <template>
-  <div class="app-container">
-    <el-form ref="form" :model="form" label-width="120px">
-      <el-form-item label="Activity name">
-        <el-input v-model="form.name" />
-      </el-form-item>
-      <el-form-item label="Activity zone">
-        <el-select v-model="form.region" placeholder="please select your zone">
-          <el-option label="Zone one" value="shanghai" />
-          <el-option label="Zone two" value="beijing" />
-        </el-select>
-      </el-form-item>
-      <el-form-item label="Activity time">
-        <el-col :span="11">
-          <el-date-picker v-model="form.date1" type="date" placeholder="Pick a date" style="width: 100%;" />
-        </el-col>
-        <el-col :span="2" class="line">-</el-col>
-        <el-col :span="11">
-          <el-time-picker v-model="form.date2" type="fixed-time" placeholder="Pick a time" style="width: 100%;" />
-        </el-col>
-      </el-form-item>
-      <el-form-item label="Instant delivery">
-        <el-switch v-model="form.delivery" />
-      </el-form-item>
-      <el-form-item label="Activity type">
-        <el-checkbox-group v-model="form.type">
-          <el-checkbox label="Online activities" name="type" />
-          <el-checkbox label="Promotion activities" name="type" />
-          <el-checkbox label="Offline activities" name="type" />
-          <el-checkbox label="Simple brand exposure" name="type" />
-        </el-checkbox-group>
-      </el-form-item>
-      <el-form-item label="Resources">
-        <el-radio-group v-model="form.resource">
-          <el-radio label="Sponsor" />
-          <el-radio label="Venue" />
-        </el-radio-group>
-      </el-form-item>
-      <el-form-item label="Activity form">
-        <el-input v-model="form.desc" type="textarea" />
-      </el-form-item>
-      <el-form-item>
-        <el-button type="primary" @click="onSubmit">Create</el-button>
-        <el-button @click="onCancel">Cancel</el-button>
-      </el-form-item>
-    </el-form>
+  <div class="dashboard-container">
+    <el-row :gutter="20">
+      <el-col :span="8">
+        <div class="grid-content bg-purple">
+          <!-- 首页user信息 -->
+          <el-card shadow="hover">
+            <div class="userCard">
+              <el-avatar :size="150" :src="imgUrl" />
+              <div class="userInfo">
+                <p class="important-font">Admin</p>
+                <p class="secondary-font">管理员</p>
+              </div>
+            </div>
+            <div class="login-info">
+              <p>上次登录时间: 2023/03/15 18:16</p>
+            </div>
+          </el-card>
+          <!-- 首页表格 -->
+          <el-card shadow="hover" class="tableInfo">
+            <div slot="header">
+              <span class="important-font">员工信息</span>
+            </div>
+            <div>
+              <el-table
+                :data="tableData"
+                stripe
+                border
+                height="450px"
+                style="width: 100%"
+              >
+                <el-table-column prop="date" label="日期" width="120" />
+                <el-table-column prop="name" label="姓名" width="80" />
+                <el-table-column prop="position" label="职位" />
+              </el-table>
+            </div>
+          </el-card>
+        </div>
+      </el-col>
+      <el-col :span="16">
+        <div class="num">
+          <el-card
+            v-for="item in countData"
+            :key="item.name"
+            shadow="hover"
+            :body-style="{ display: 'flex',padding: 0 }"
+            class="OrderCard"
+          >
+            <i
+              class="icon"
+              :class="'el-icon-'+item.icon"
+              :style="{ background: item.color}"
+            />
+            <div>
+              <p class="important-font">￥{{ item.value }}</p>
+              <p class="secondary-font">{{ item.name }}</p>
+            </div>
+          </el-card>
+        </div>
+      </el-col>
+      <div>
+        <div style="margin-top: 2%; margin-left: 40%; width: 50%">
+          <el-table :data="messageData" stripe style="width: 100%">
+            <el-table-column prop="msg" label="通知" width="550">
+              <template slot-scope="scope">
+                <a
+                  href="scope.row.msg"
+                  target="_blank"
+                  class="buttonText"
+                >{{ scope.row.msg }}</a>
+              </template>
+            </el-table-column>
+
+            <el-table-column prop="date" width="150">
+              <template slot="header" slot-scope="scope">
+                <a class="color: #3c494b" href="" target="_blank">More</a>
+              </template>
+            </el-table-column>
+          </el-table>
+        </div>
+      </div></el-row>
   </div>
 </template>
 
 <script>
 export default {
+  name: 'Index',
   data() {
     return {
-      form: {
-        name: '',
-        region: '',
-        date1: '',
-        date2: '',
-        delivery: false,
-        type: [],
-        resource: '',
-        desc: ''
+      tableData: [{
+        date: '2023-03-14',
+        name: 'ken',
+        position: 'C++管理员'
+      },
+      {
+        date: '2023-03-12',
+        name: 'anny',
+        position: 'Java管理员'
+      },
+      {
+        date: '2023-03-10',
+        name: 'bta',
+        position: '前端设计师'
       }
-    }
-  },
-  methods: {
-    onSubmit() {
-      this.$message('submit!')
-    },
-    onCancel() {
-      this.$message({
-        message: 'cancel!',
-        type: 'warning'
-      })
+      ],
+      messageData: [{
+        msg: '员工通告',
+        date: '2022-05-13'
+      },
+      {
+        msg: '晋升通知',
+        date: '2022-07-15'
+      }
+      ]
     }
   }
 }
 </script>
 
-<style scoped>
-.line{
-  text-align: center;
+<style lang="scss" scoped>
+.dashboard {
+  &-container {
+    margin: 30px;
+  }
+  &-text {
+    font-size: 30px;
+    line-height: 46px;
+  }
 }
-</style>
 
+</style>

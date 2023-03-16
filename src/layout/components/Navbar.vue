@@ -5,6 +5,9 @@
     <breadcrumb class="breadcrumb-container" />
 
     <div class="right-menu">
+      <el-button>
+        <span>{{ dateFormat(newDate) }}</span>
+      </el-button>
       <el-dropdown class="avatar-container" trigger="click">
         <div class="avatar-wrapper">
           <img :src="avatar+'?imageView2/1/w/80/h/80'" class="user-avatar">
@@ -48,9 +51,24 @@ export default {
     async logout() {
       await this.$store.dispatch('user/logout')
       this.$router.push(`/login?redirect=${this.$route.fullPath}`)
+    },
+    // 时间格式化
+    dateFormat() {
+    	var date = new Date()
+      var year = date.getFullYear()
+      var month = date.getMonth() + 1 < 10 ? '0' + (date.getMonth() + 1) : date.getMonth() + 1
+      var day = date.getDate() < 10 ? '0' + date.getDate() : date.getDate()
+      var hours = date.getHours() < 10 ? '0' + date.getHours() : date.getHours()
+      var minutes = date.getMinutes() < 10 ? '0' + date.getMinutes() : date.getMinutes()
+      var seconds = date.getSeconds() < 10 ? '0' + date.getSeconds() : date.getSeconds()
+      const week = date.getDay() // 星期
+      const weekArr = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六']
+      // 拼接 时间格式处理
+      return year + '年' + month + '月' + day + '日 ' + hours + ':' + minutes + ':' + seconds + ' ' + weekArr[week]
     }
   }
 }
+
 </script>
 
 <style lang="scss" scoped>
