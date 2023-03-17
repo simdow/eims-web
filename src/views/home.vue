@@ -6,7 +6,7 @@
           <!-- 首页user信息 -->
           <el-card shadow="hover">
             <div class="userCard">
-              <el-avatar :size="150" :src="imgUrl" />
+              <el-avatar :size="150" src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png" />
               <div class="userInfo">
                 <p class="important-font">Admin</p>
                 <p class="secondary-font">管理员</p>
@@ -29,7 +29,6 @@
                 height="450px"
                 style="width: 100%"
               >
-                <el-table-column prop="date" label="日期" width="120" />
                 <el-table-column prop="name" label="姓名" width="80" />
                 <el-table-column prop="position" label="职位" />
               </el-table>
@@ -128,4 +127,3 @@ export default {
   }
 }
 
-</style>

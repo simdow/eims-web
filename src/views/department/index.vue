@@ -11,8 +11,11 @@
     <div>
       <el-table
         :data="apartmentData"
-        border
-        style="width = 50% ; margin-left: 30%; margin-top: 10%;"
+        border="true"
+        height="800"
+        style="width:100%"
+        :cell-style="rowClass"
+        :header-cell-style="headClass"
       >
         <el-table-column
           prop="apartmentId"
@@ -20,6 +23,7 @@
           width="200"
           align="center"
         />
+        </el-table-column>
         <el-table-column
           prop="apartmentName"
           label="部门名称"
@@ -29,7 +33,8 @@
         </el-table-column>
       </el-table>
       <div />
-    </div></el-input></div></div></template>
+    </div>
+  </div></template>
 
 <script>
 export default {
@@ -46,6 +51,16 @@ export default {
         }
       ],
       searchInput: ''
+    }
+  },
+  methods: {
+    // 表头样式
+    headClass() {
+      return 'text-align: center;background:rgb(242,242,242);color:rgb(140,138,140)'
+    },
+    // 表格样式
+    rowClass() {
+      return 'text-align: center;'
     }
   }
 }
