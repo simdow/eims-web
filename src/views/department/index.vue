@@ -10,7 +10,7 @@
                 <el-input
                   v-model="query.department_id"
                   clearable
-                  style="width: 150px; margin-right: 10px"
+                  style="width: 120px; margin-right: 10px"
                   type="number"
                 />
               </el-form-item>
@@ -22,7 +22,7 @@
                 <el-input
                   v-model="query.department_name"
                   clearable
-                  style="width: 150px; margin-right: 10px"
+                  style="width: 120px; margin-right: 10px"
                 />
               </el-form-item>
             </el-form>
@@ -36,8 +36,11 @@
               <el-button type="danger" icon="el-icon-delete" @click="multiDeleteCheckBox = true">
                 批量删除
               </el-button>
-              <el-button type="primary" @click="exportToExcel">
+              <el-button type="primary" icon="el-icon-download" @click="exportToExcel">
                 导出
+              </el-button>
+              <el-button type="primary" icon="el-icon-refresh" @click="getTableData">
+                刷新
               </el-button>
             </el-button-group>
           </el-col>
@@ -364,7 +367,7 @@ export default {
             this.$notify({
               title: '删除失败',
               message: '删除失败',
-              type: 'Error',
+              type: 'error',
               duration: 2000
             })
             console.log('fail to delete', response.data)
@@ -383,7 +386,7 @@ export default {
           this.$notify({
             title: '删除失败',
             message: '删除失败',
-            type: 'Error',
+            type: 'error',
             duration: 2000
           })
           console.log('fail to get table data', err)
@@ -427,7 +430,7 @@ export default {
               t.$notify({
                 title: '删除失败',
                 message: '删除失败' + '-' + department_id,
-                type: 'Error',
+                type: 'error',
                 duration: 2000
               })
               console.log('fail to delete', response.data)
@@ -445,7 +448,7 @@ export default {
             t.$notify({
               title: '删除失败',
               message: '删除失败' + '-' + department_id,
-              type: 'Error',
+              type: 'error',
               duration: 2000
             })
             console.log('fail to get table data', err)
@@ -466,7 +469,7 @@ export default {
         t.$notify({
           title: '批量删除失败',
           message: '批量删除失败',
-          type: 'Error',
+          type: 'error',
           duration: 2000
         })
         t.getTableData()

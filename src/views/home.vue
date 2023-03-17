@@ -1,5 +1,5 @@
 <template>
-  <div class="dashboard-container">
+  <div class="home-container">
     <el-row :gutter="20">
       <el-col :span="8">
         <div class="grid-content bg-purple">
@@ -10,29 +10,33 @@
               <div class="userInfo">
                 <p class="important-font">Admin</p>
                 <p class="secondary-font">身份 : 管理员</p>
-                <p class="secondary-font">上次登录时间:{{ getTime }}</p>
+                <p class="secondary-font">上次登录时间: {{ loginTime }}</p>
               </div>
             </div>
 
           </el-card>
-          <!-- 首页表格 -->
-          <el-card shadow="hover" class="tableInfo">
-            <div slot="header">
-              <span class="important-font">员工信息</span>
-            </div>
-            <div>
-              <el-table
-                :data="tableData"
-                stripe
-                border
-                height="250px"
-                style="width: 100%"
-              >
-                <el-table-column prop="name" label="姓名" width="80" />
-                <el-table-column prop="position" label="职位" />
-              </el-table>
-            </div>
-          </el-card>
+          <div>
+            <el-calendar ref="calendar">
+              <template #header="{ date }">
+                <span>工作日历</span>
+                <el-button-group>
+                  <el-button size="small" @click="selectDate('prev-year')">
+                    Previous Year
+                  </el-button>
+                  <el-button size="small" @click="selectDate('prev-month')">
+                    Previous Month
+                  </el-button>
+                  <el-button size="small" @click="selectDate('today')">Today</el-button>
+                  <el-button size="small" @click="selectDate('next-month')">
+                    Next Month
+                  </el-button>
+                  <el-button size="small" @click="selectDate('next-year')">
+                    Next Year
+                  </el-button>
+                </el-button-group>
+              </template>
+            </el-calendar>
+          </div>
         </div>
       </el-col>
       <el-col :span="16">
@@ -56,51 +60,43 @@
           </el-card>
         </div>
       </el-col>
-      <el-col :span="10">
-        <div class="grid-content bg-purple">
-          <el-card class="box-card" style="height: 660px">
-            <div slot="header" class="clearfix">
-              <span>日历</span>
-            </div>
-            <div class="cal">
-              <el-calendar>
-                <template slot="dateCell" slot-scope="{date,data}">
-                  <p :class="data.isSelected ? 'is-selected' : ''">
-                    {{ data.day.split('-').slice(2).join('') }}{{ data.isSelected ? '' : '' }}
-                  </p>
-                </template>
-              </el-calendar>
-            </div>
-          </el-card>
+      <el-carousel :interval="4000" type="card" height="300px">
+        <el-carousel-item v-for="item in 6" :key="item">
+          <h3 text="2xl" justify="center">{{ item }}</h3>
+        </el-carousel-item>
+      </el-carousel>
+      <div>
+        <div style="margin-top: 5%; margin-left: 40%; width: 49%">
+          <el-table :data="messageData" stripe style="width: 100%">
+            <el-table-column prop="msg" label="通知" width="580">
+              <template slot-scope="scope">
+                <a
+                  href="scope.row.msg"
+                  target="_blank"
+                  class="buttonText"
+                >{{ scope.row.msg }}</a>
+              </template>
+            </el-table-column>
+
+            <el-table-column prop="date" width="150">
+              <template slot="header" slot-scope="scope">
+                <a class="color: #3c494b" href="" target="_blank">More</a>
+              </template>
+            </el-table-column>
+          </el-table>
         </div>
-      </el-col>
-      <el-col :span="6">
-        <div>
-          <div style="width: 100%">
-            <el-table :data="messageData" stripe style="width: 40% height=100">
-              <el-table-column prop="msg" label="通知" width="330">
-                <template slot-scope="scope">
-                  <a
-                    href="scope.row.msg"
-                    target="_blank"
-                    class="buttonText"
-                  >{{ scope.row.msg }}</a>
-                </template>
-              </el-table-column>
-            </el-table>
-          </div>
-        </div>
-      </el-col>
-    </el-row>
+      </div></el-row>
   </div>
 </template>
 
 <script>
+import { ref } from 'vue'
+
 export default {
-  name: 'Index',
+  name: 'Home',
   data() {
     return {
-      calendar: new Date(),
+      loginTime: '未知',
       tableData: [{
         date: '2023-03-14',
         name: 'ken',
@@ -125,15 +121,12 @@ export default {
         msg: '晋升通知',
         date: '2022-07-15'
       }
-      ]
+      ],
+      calendar: null
     }
   },
-  method: {
-    showTime: function() {
-      var date = this.getTime()
-      console.log(date)
-    },
-    getTime: function() {
+  mounted() {
+    this.loginTime = (function() {
       var date = new Date()
       var op1 = '-'
       var op2 = ':'
@@ -145,16 +138,22 @@ export default {
       if (now >= 0 && now <= 9) {
         now = '0' + now
       }
-      var current = date.getFullYear() + op1 + month + op1 + now + '' + date.getHours() + op2 + date.getMinutes()
+      var current = date.getFullYear() + op1 + month + op1 + now + ' ' + date.getHours() + op2 + date.getMinutes()
 
       return current
+    }())
+    this.calendar = ref('calendar')
+  },
+  method: {
+    selectDate: (val) => {
+      this.calendar.value.selectDate(val)
     }
   }
 }
 </script>
 
 <style lang="scss" scoped>
-.dashboard {
+.home {
   &-container {
     margin: 30px;
   }
@@ -175,5 +174,23 @@ export default {
   width: 10%;
 }
 
-</style>
+.el-carousel__item h3 {
+  color: #91e61a;
+  opacity: 0.75;
+  line-height: 200px;
+  margin: 0;
+  text-align: center;
+}
 
+.el-carousel__item:nth-child(2n) {
+  background-color: #6d88ae;
+}
+
+.el-carousel__item:nth-child(2n + 1) {
+  background-color: #da4994;
+}
+
+.cal .el-calendar-table .el-calendar-day {
+  height: 30px;
+}
+</style>

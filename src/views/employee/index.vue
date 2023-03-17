@@ -26,8 +26,11 @@
               <el-button type="danger" icon="el-icon-delete" @click="multiDeleteCheckBox = true">
                 批量删除
               </el-button>
-              <el-button type="primary" @click="exportToExcel">
+              <el-button type="primary" icon="el-icon-download" @click="exportToExcel">
                 导出
+              </el-button>
+              <el-button type="primary" icon="el-icon-refresh" @click="getTableData">
+                刷新
               </el-button>
             </el-button-group>
           </el-form-item>
@@ -121,6 +124,7 @@
         <el-table-column prop="education" align="center" label="教育程度" sortable />
         <el-table-column prop="join_time" align="center" label="入职时间" sortable />
         <el-table-column
+          :key="department_name"
           prop="department_name"
           align="center"
           label="所属部门"
@@ -638,7 +642,7 @@ export default {
             this.$notify({
               title: '删除失败',
               message: '删除失败',
-              type: 'Error',
+              type: 'error',
               duration: 2000
             })
             console.log('fail to delete', response.data)
@@ -657,7 +661,7 @@ export default {
           this.$notify({
             title: '删除失败',
             message: '删除失败',
-            type: 'Error',
+            type: 'error',
             duration: 2000
           })
           console.log('fail to get table data', err)
@@ -709,7 +713,7 @@ export default {
               t.$notify({
                 title: '删除失败',
                 message: '删除失败' + '-' + user_id,
-                type: 'Error',
+                type: 'error',
                 duration: 2000
               })
               console.log('fail to delete', response.data)
@@ -727,7 +731,7 @@ export default {
             t.$notify({
               title: '删除失败',
               message: '删除失败' + '-' + user_id,
-              type: 'Error',
+              type: 'error',
               duration: 2000
             })
             console.log('fail to get table data', err)
@@ -748,7 +752,7 @@ export default {
         t.$notify({
           title: '批量删除失败',
           message: '批量删除失败',
-          type: 'Error',
+          type: 'error',
           duration: 2000
         })
         t.getTableData()

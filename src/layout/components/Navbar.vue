@@ -158,7 +158,7 @@ export default {
     color: #5a5e66;
     vertical-align: text-bottom;
     text-align: right;
-    width: 85%;
+    width: 82%;
   }
 
   .right-menu {
