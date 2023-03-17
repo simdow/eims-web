@@ -155,6 +155,7 @@
       <el-dialog
         :visible.sync="dialogVisible"
         :title="dialogType === 'edit' ? '编辑职员' : '创建职员'"
+        :show-close="false"
       >
         <el-form :model="dialogData" label-width="80px" label-position="left">
           <el-form-item v-if="dialogType === 'edit'" label="职员编号">
@@ -308,7 +309,7 @@ import XLSX from 'xlsx'
 import XLSXS from 'xlsx-style'
 
 export default {
-  name: 'Dashboard',
+  name: 'Employee',
   computed: {
     ...mapGetters(['name']),
     inputTableData() {
@@ -492,8 +493,6 @@ export default {
       }
       //
       this.close()
-      //
-      console.log('addData', addData)
       //
       axios.put(APIUrl + '/api/employee', addData, {
         headers: {

@@ -9,12 +9,11 @@
               <el-avatar :size="150" src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png" />
               <div class="userInfo">
                 <p class="important-font">Admin</p>
-                <p class="secondary-font">管理员</p>
+                <p class="secondary-font">身份 : 管理员</p>
+                <p class="secondary-font">上次登录时间:{{ getTime }}</p>
               </div>
             </div>
-            <div class="login-info">
-              <p>上次登录时间: 2023/03/15 18:16</p>
-            </div>
+
           </el-card>
           <!-- 首页表格 -->
           <el-card shadow="hover" class="tableInfo">
@@ -57,27 +56,42 @@
           </el-card>
         </div>
       </el-col>
-      <div>
-        <div style="margin-top: 2%; margin-left: 45%; width: 60%">
-          <el-table :data="messageData" stripe style="width: 100%">
-            <el-table-column prop="msg" label="通知" width="580">
-              <template slot-scope="scope">
-                <a
-                  href="scope.row.msg"
-                  target="_blank"
-                  class="buttonText"
-                >{{ scope.row.msg }}</a>
-              </template>
-            </el-table-column>
-
-            <el-table-column prop="date" width="150">
-              <template slot="header" slot-scope="scope">
-                <a class="color: #3c494b" href="" target="_blank">More</a>
-              </template>
-            </el-table-column>
-          </el-table>
+      <el-col :span="10">
+        <div class="grid-content bg-purple">
+          <el-card class="box-card" style="height: 660px">
+            <div slot="header" class="clearfix">
+              <span>日历</span>
+            </div>
+            <div class="cal">
+              <el-calendar>
+                <template slot="dateCell" slot-scope="{date,data}">
+                  <p :class="data.isSelected ? 'is-selected' : ''">
+                    {{ data.day.split('-').slice(2).join('') }}{{ data.isSelected ? '' : '' }}
+                  </p>
+                </template>
+              </el-calendar>
+            </div>
+          </el-card>
         </div>
-      </div></el-row>
+      </el-col>
+      <el-col :span="6">
+        <div>
+          <div style="width: 100%">
+            <el-table :data="messageData" stripe style="width: 40% height=100">
+              <el-table-column prop="msg" label="通知" width="330">
+                <template slot-scope="scope">
+                  <a
+                    href="scope.row.msg"
+                    target="_blank"
+                    class="buttonText"
+                  >{{ scope.row.msg }}</a>
+                </template>
+              </el-table-column>
+            </el-table>
+          </div>
+        </div>
+      </el-col>
+    </el-row>
   </div>
 </template>
 
@@ -86,6 +100,7 @@ export default {
   name: 'Index',
   data() {
     return {
+      calendar: new Date(),
       tableData: [{
         date: '2023-03-14',
         name: 'ken',
@@ -112,6 +127,28 @@ export default {
       }
       ]
     }
+  },
+  method: {
+    showTime: function() {
+      var date = this.getTime()
+      console.log(date)
+    },
+    getTime: function() {
+      var date = new Date()
+      var op1 = '-'
+      var op2 = ':'
+      var month = date.getMonth() + 1
+      var now = date.getDate()
+      if (month >= 1 && now <= 9) {
+        month = '0' + month
+      }
+      if (now >= 0 && now <= 9) {
+        now = '0' + now
+      }
+      var current = date.getFullYear() + op1 + month + op1 + now + '' + date.getHours() + op2 + date.getMinutes()
+
+      return current
+    }
   }
 }
 </script>
@@ -126,4 +163,17 @@ export default {
     line-height: 46px;
   }
 }
+
+.view-flex {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.cal .el-calendar-table .el-calendar-day{
+  height: 10%;
+  width: 10%;
+}
+
+</style>
 
