@@ -1,5 +1,5 @@
 <template>
-  <div class="dashboard-container">
+  <div class="employee-container">
     <div>
       <div style="display: flex; justify-content: space-between" />
       <div>
@@ -11,9 +11,6 @@
               style="width: 150px; margin-right: 10px"
               type="number"
             />
-            <el-button icon="el-icon-search" type="primary">{{
-              !expandMore ? "搜索" : "高级搜索"
-            }}</el-button>
             <el-button
               :icon="expandMore ? 'el-icon-arrow-up' : 'el-icon-arrow-down'"
               type="text"
@@ -45,19 +42,35 @@
                     style="width: 200px; margin-right: 10px"
                   />
                 </el-form-item>
-                <el-form-item label="性别" prop="sex">
-                  <el-input
-                    v-model="query.name"
-                    clearable
-                    style="width: 100px; margin-right: 10px"
-                  />
+                <el-form-item label="职位">
+                  <el-select v-model="query.position" placeholder="">
+                    <el-option
+                      key=""
+                      label=""
+                      value=""
+                    />
+                    <el-option
+                      v-for="(_, item) in getPositions()"
+                      :key="item"
+                      :label="item"
+                      :value="item"
+                    />
+                  </el-select>
                 </el-form-item>
-                <el-form-item label="年龄" prop="age">
-                  <el-input
-                    v-model="query.age"
-                    clearable
-                    style="width: 100px; margin-right: 10px"
-                  />
+                <el-form-item label="所属部门">
+                  <el-select v-model="query.department_name" placeholder="">
+                    <el-option
+                      key=""
+                      label=""
+                      value=""
+                    />
+                    <el-option
+                      v-for="(item, index) in departmentTableData"
+                      :key="index"
+                      :label="item.department_name"
+                      :value="item.department_name"
+                    />
+                  </el-select>
                 </el-form-item>
               </el-form>
             </template>
@@ -70,7 +83,7 @@
     <div>
       <el-table
         id="table"
-        :data="tableData"
+        :data="inputTableData"
         style="width: 100%"
         height="500"
         border
@@ -86,29 +99,32 @@
           width="100"
           sortable
         />
-        <el-table-column prop="name" align="center" label="姓名" width="120" />
-        <el-table-column prop="sex" align="center" label="性别" width="80" />
-        <el-table-column prop="age" align="center" label="年龄" width="80" />
+        <el-table-column prop="name" align="center" label="姓名" width="120" sortable />
+        <el-table-column prop="sex" align="center" label="性别" width="80" sortable />
+        <el-table-column prop="age" align="center" label="年龄" width="80" sortable />
         <el-table-column
           prop="phone"
           align="center"
           label="手机号"
           width="130"
+          sortable
         />
-        <el-table-column prop="email" align="center" label="邮箱" width="180" />
+        <el-table-column prop="email" align="center" label="邮箱" width="180" sortable />
         <el-table-column
           prop="position"
           align="center"
           label="职位"
           width="110"
+          sortable
         />
-        <el-table-column prop="marry" align="center" label="婚姻状况" />
-        <el-table-column prop="education" align="center" label="教育程度" />
-        <el-table-column prop="join_time" align="center" label="入职时间" />
+        <el-table-column prop="marry" align="center" label="婚姻状况" sortable />
+        <el-table-column prop="education" align="center" label="教育程度" sortable />
+        <el-table-column prop="join_time" align="center" label="入职时间" sortable />
         <el-table-column
           prop="department_name"
           align="center"
           label="所属部门"
+          sortable
         />
         <el-table-column
           fixed="right"
@@ -294,7 +310,29 @@ import XLSXS from 'xlsx-style'
 export default {
   name: 'Dashboard',
   computed: {
-    ...mapGetters(['name'])
+    ...mapGetters(['name']),
+    inputTableData() {
+      var queryMap = this.query
+      if (queryMap.user_id || queryMap.name || queryMap.position || queryMap.department_name) {
+        return this.tableData.filter(data => {
+          var match = true
+          if (queryMap.user_id !== null) {
+            match = match & (String(data.user_id).indexOf(queryMap.user_id) === 0)
+          }
+          if (queryMap.name !== '') {
+            match = match & (data.name.indexOf(queryMap.name) > -1)
+          }
+          if (queryMap.position !== '') {
+            match = match & (data.position.indexOf(queryMap.position) > -1)
+          }
+          if (queryMap.department_name !== '') {
+            match = match & (data.department_name.indexOf(queryMap.department_name) > -1)
+          }
+          return match
+        })
+      }
+      return this.tableData
+    }
   },
   mounted() {
     this.getTableData()
@@ -614,6 +652,7 @@ export default {
             duration: 2000
           })
           this.tableData.splice(scope.$index, 1)
+          this.getTableData()
         })
         .catch((err) => {
           this.$notify({
@@ -640,60 +679,91 @@ export default {
       }
       this.chooseData = []
       //
-      this.$notify({
+      var t = this
+      //
+      t.$notify({
         title: '批量删除中',
         message: '批量删除中，请勿进行任何操作',
-        type: 'Info',
+        type: 'info',
         duration: 2000
       })
+
+      var taskList = []
+
       for (const index in deleteUserID) {
-        axios.delete(
-          APIUrl + '/api/employee',
-          {
-            data: {
-              user_id: deleteUserID[index]
+        var user_id = deleteUserID[index]
+        taskList.push(new Promise((resolve, reject) => {
+          axios.delete(
+            APIUrl + '/api/employee',
+            {
+              data: {
+                user_id: user_id
+              }
+            },
+            {
+              headers: {
+                'Content-Type': 'application/json'
+              }
             }
-          },
-          {
-            headers: {
-              'Content-Type': 'application/json'
+          ).then((response) => {
+            if (response.data.code !== 0) {
+              t.$notify({
+                title: '删除失败',
+                message: '删除失败' + '-' + user_id,
+                type: 'Error',
+                duration: 2000
+              })
+              console.log('fail to delete', response.data)
+              reject(user_id)
+              return
             }
-          }
-        ).then((response) => {
-          if (response.data.code !== 0) {
-            this.$notify({
+            t.$notify({
+              title: '删除成功',
+              message: '删除成功' + '-' + user_id,
+              type: 'success',
+              duration: 2000
+            })
+            resolve(user_id)
+          }).catch((err) => {
+            t.$notify({
               title: '删除失败',
-              message: '删除失败' + '-' + deleteUserID[index],
+              message: '删除失败' + '-' + user_id,
               type: 'Error',
               duration: 2000
             })
-            console.log('fail to delete', response.data)
-            return
-          }
-          this.$notify({
-            title: '删除成功',
-            message: '删除成功' + '-' + deleteUserID[index],
-            type: 'success',
-            duration: 2000
+            console.log('fail to get table data', err)
+            reject(user_id)
           })
-        }).catch((err) => {
-          this.$notify({
-            title: '删除失败',
-            message: '删除失败' + '-' + deleteUserID[index],
-            type: 'Error',
-            duration: 2000
-          })
-          console.log('fail to get table data', err)
-        })
+        }))
       }
-      this.$notify({
-        title: '批量删除成功',
-        message: '批量删除成功',
-        type: 'success',
-        duration: 2000
+
+      Promise.all(taskList).then(successList => {
+        t.$notify({
+          title: '批量删除成功',
+          message: '批量删除成功',
+          type: 'success',
+          duration: 2000
+        })
+        t.getTableData()
+      }).catch(errorList => {
+        t.$notify({
+          title: '批量删除失败',
+          message: '批量删除失败',
+          type: 'Error',
+          duration: 2000
+        })
+        t.getTableData()
       })
-      //
-      this.getTableData()
+    },
+    getPositions() {
+      var posotionMap = {}
+      for (var index in this.tableData) {
+        var position = this.tableData[index].position
+        if (position !== null && position !== '') {
+          posotionMap[position] = 1
+        }
+      }
+      return posotionMap
     }
   },
   data() {
@@ -720,14 +790,9 @@ export default {
       dialogData: {},
       expandMore: false, // 是否展开更多搜索条件
       query: {
-        user_id: '',
+        user_id: null,
         name: '',
-        sex: '',
-        age: '',
         position: '',
-        marry: '',
-        education: '',
-        join_time: '',
         department_name: ''
       },
       tableData: [],
@@ -751,7 +816,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.dashboard {
+.employee {
   &-container {
     margin: 30px;
   }

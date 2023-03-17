@@ -1,5 +1,5 @@
 <template>
-  <div class="management-container">
+  <div class="department-container">
     <div>
       <el-input
         v-model="searchInput"
@@ -10,7 +10,7 @@
 
     <div>
       <el-table
-        :data="apartmentData"
+        :data="departmentData"
         border="true"
         height="800"
         style="width:100%"
@@ -18,14 +18,14 @@
         :header-cell-style="headClass"
       >
         <el-table-column
-          prop="apartmentId"
+          prop="departmentId"
           label="ID"
           width="200"
           align="center"
         />
         </el-table-column>
         <el-table-column
-          prop="apartmentName"
+          prop="departmentName"
           label="部门名称"
           width="200"
           align="center"
@@ -40,14 +40,14 @@
 export default {
   data() {
     return {
-      apartmentData: [
+      departmentData: [
         {
-          apartmentId: '1',
-          apartmentName: '技术部'
+          departmentId: '1',
+          departmentName: '技术部'
         },
         {
-          apartmentId: '2',
-          apartmentName: '审核部'
+          departmentId: '2',
+          departmentName: '审核部'
         }
       ],
       searchInput: ''
@@ -65,3 +65,15 @@ export default {
   }
 }
 </script>
+
+<style lang="scss" scoped>
+.department {
+  &-container {
+    margin: 30px;
+  }
+  &-text {
+    font-size: 30px;
+    line-height: 46px;
+  }
+}
+</style>

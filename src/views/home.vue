@@ -26,7 +26,7 @@
                 :data="tableData"
                 stripe
                 border
-                height="450px"
+                height="250px"
                 style="width: 100%"
               >
                 <el-table-column prop="name" label="姓名" width="80" />
@@ -58,9 +58,9 @@
         </div>
       </el-col>
       <div>
-        <div style="margin-top: 2%; margin-left: 40%; width: 50%">
+        <div style="margin-top: 2%; margin-left: 45%; width: 60%">
           <el-table :data="messageData" stripe style="width: 100%">
-            <el-table-column prop="msg" label="通知" width="550">
+            <el-table-column prop="msg" label="通知" width="580">
               <template slot-scope="scope">
                 <a
                   href="scope.row.msg"
