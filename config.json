@@ -1,0 +1,10 @@
+{
+    "listen_address": "[::]:8080",
+    "database": {
+        "driver_name": "mysql",
+        "url": "ims:[HbMd/H2UCJbhEmj@tcp(gz-cynosdbmysql-grp-5unz342d.sql.tencentcdb.com:21603)/IMS?charset=utf8&parseTime=True",
+        "init": true
+    },
+    "username": "admin",
+    "password": "admin"
+}
