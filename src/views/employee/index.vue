@@ -441,8 +441,7 @@ export default {
             editData['new_' + key] = ageInt
             continue
           case 'join_time':
-            editData['new_' + key] =
-              new Date(this.dialogData[key]).getTime() / 1000
+            editData['new_' + key] = new Date(this.dialogData[key]+' 00:00:00').getTime() / 1000
             continue
         }
       }

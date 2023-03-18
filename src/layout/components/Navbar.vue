@@ -45,9 +45,6 @@ export default {
       'avatar'
     ])
   },
-  created() {
-    this.getTimes()
-  },
   beforeDestroy() {
     if (this.times) {
       clearInterval(this.getTimesInterval)
