@@ -4,20 +4,16 @@
       <div style="display: flex; justify-content: space-between" />
       <div>
         <el-form ref="emp">
-          <el-form-item label="职员编号">
+          <el-form-item label="搜索框">
             <el-input
-              v-model="query.user_id"
+              v-model="query"
               clearable
               style="width: 150px; margin-right: 10px"
-              type="number"
             />
             <el-button
-              :icon="expandMore ? 'el-icon-arrow-up' : 'el-icon-arrow-down'"
               type="text"
-              @click="expandMore = !expandMore"
-            >{{
-              expandMore ? "高级搜索 - 收起" : "高级搜索 - 展开"
-            }}</el-button>
+              @click="openSearchDialog()"
+            >高级搜索</el-button>
 
             <el-button-group style="margin-left: 50px">
               <el-button type="primary" icon="el-icon-plus" @click="add">
@@ -35,49 +31,6 @@
             </el-button-group>
           </el-form-item>
 
-          <div>
-            <template v-if="expandMore">
-              <el-form :inline="true">
-                <el-form-item label="姓名" prop="name">
-                  <el-input
-                    v-model="query.name"
-                    clearable
-                    style="width: 200px; margin-right: 10px"
-                  />
-                </el-form-item>
-                <el-form-item label="职位">
-                  <el-select v-model="query.position" placeholder="">
-                    <el-option
-                      key=""
-                      label=""
-                      value=""
-                    />
-                    <el-option
-                      v-for="(_, item) in getPositions()"
-                      :key="item"
-                      :label="item"
-                      :value="item"
-                    />
-                  </el-select>
-                </el-form-item>
-                <el-form-item label="所属部门">
-                  <el-select v-model="query.department_name" placeholder="">
-                    <el-option
-                      key=""
-                      label=""
-                      value=""
-                    />
-                    <el-option
-                      v-for="(item, index) in departmentTableData"
-                      :key="index"
-                      :label="item.department_name"
-                      :value="item.department_name"
-                    />
-                  </el-select>
-                </el-form-item>
-              </el-form>
-            </template>
-          </div>
         </el-form>
       </div>
     </div>
@@ -87,6 +40,7 @@
       <el-table
         id="table"
         :data="inputTableData"
+        :pagination="pagination"
         style="width: 100%"
         height="500"
         border
@@ -124,7 +78,7 @@
         <el-table-column prop="education" align="center" label="教育程度" sortable />
         <el-table-column prop="join_time" align="center" label="入职时间" sortable />
         <el-table-column
-          :key="department_name"
+          key="department_name"
           prop="department_name"
           align="center"
           label="所属部门"
@@ -153,6 +107,16 @@
           </template>
         </el-table-column>
       </el-table>
+      <div style="text-align: center;margin-top: 30px;">
+        <el-pagination
+          background
+          :layout="pagination.layout"
+          :current-page="pagination.currentPage"
+          :page-size="pagination.pageSize"
+          :total="pagination.total"
+          @current-change="handleCurrentChange">
+        </el-pagination>
+      </div>
     </div>
 
     <div>
@@ -301,6 +265,113 @@
       </el-dialog>
     </div>
 
+    <div>
+      <el-dialog
+        :visible.sync="searchDialogVisible"
+        title="高级搜索"
+        modal
+        center
+        :close-on-click-modal="false"
+        width="80%"
+        :before-close="() => { this.searchResultTableData = []; this.searchConditionData = []; this.searchDialogVisible = false; }"
+      >
+        <div>
+          <el-row :span="2">
+            <el-button
+              type="text"
+              @click="addRootCondition"
+            >
+              添加根条件
+            </el-button>
+            <el-button
+              type="text"
+              @click="delAllCondition"
+            >
+              删除所有条件
+            </el-button>
+            <el-button
+              type="text"
+              @click="Search"
+            >
+              搜索
+            </el-button>
+          </el-row>
+          <el-row :span="6">
+            <el-tree
+              node-key="_id"
+              default-expand-all
+              :expand-on-click-node="false"
+              :data="searchConditionData"
+            >
+              <template #default="{ node, data }">
+                <span class="custom-tree-node">
+                  <div>
+                    <el-select v-model="node.data.key" placeholder="" class="m-2" size="small" style="width: 100px; padding-right: 2%;">
+                      <el-option v-for="(item, index) in searchTranslateMap" :key="index" :label="item" :value="index"></el-option>
+                    </el-select>
+                    <el-select v-model="node.data.condition" placeholder="" class="m-2" size="small" style="width: 100px; padding-right: 2%;">
+                      <el-option v-for="(item, index) in searchConditions" :key="index" :label="item" :value="index"></el-option>
+                    </el-select>
+                    <el-input v-model="node.data.value" placeholder="" size="small" style="width: 150px; padding-right: 2%;"></el-input>
+                  </div>
+                  <div>
+                    模式：
+                    <el-select v-model="node.data.mode" :disabled="node.data.children === undefined || node.data.children === null || node.data.children.length === 0" placeholder="" class="m-2" size="small" style="width: 90px; padding-right: 2%;">
+                      <el-option label="" value=""></el-option>
+                      <el-option label="并且" value="and"></el-option>
+                      <el-option label="或者" value="or"></el-option>
+                    </el-select>
+                    <el-button type="text" @click="addCondition(node)">添加条件</el-button>
+                    <el-button type="text" :disabled="node.parent === null || node.parent.parent === null" @click="delCondition(node)">删除条件</el-button>
+                  </div>
+                </span>
+              </template>
+            </el-tree>
+          </el-row>
+          <p />
+          <el-row :span="18">
+            <el-table :data="searchResultTableData" style="width: 100%" border fit highlight-current-row>
+              <el-table-column
+                prop="user_id"
+                align="center"
+                label="职员编号"
+                width="100"
+                sortable
+              />
+              <el-table-column prop="name" align="center" label="姓名" width="120" sortable />
+              <el-table-column prop="sex" align="center" label="性别" width="80" sortable />
+              <el-table-column prop="age" align="center" label="年龄" width="80" sortable />
+              <el-table-column
+                prop="phone"
+                align="center"
+                label="手机号"
+                width="130"
+                sortable
+              />
+              <el-table-column prop="email" align="center" label="邮箱" width="180" sortable />
+              <el-table-column
+                prop="position"
+                align="center"
+                label="职位"
+                width="110"
+                sortable
+              />
+              <el-table-column prop="marry" align="center" label="婚姻状况" sortable />
+              <el-table-column prop="education" align="center" label="教育程度" sortable />
+              <el-table-column prop="join_time" align="center" label="入职时间" sortable />
+              <el-table-column
+                key="department_name"
+                prop="department_name"
+                align="center"
+                label="所属部门"
+                sortable
+              />
+            </el-table>
+          </el-row>
+        </div>
+      </el-dialog>
+    </div>
+
   </div>
 </template>
 
@@ -312,33 +383,10 @@ import FileSaver from 'file-saver'
 import XLSX from 'xlsx'
 import XLSXS from 'xlsx-style'
 
+const { v4: uuidv4 } = require('uuid')
+
 export default {
   name: 'Employee',
-  computed: {
-    ...mapGetters(['name']),
-    inputTableData() {
-      var queryMap = this.query
-      if (queryMap.user_id || queryMap.name || queryMap.position || queryMap.department_name) {
-        return this.tableData.filter(data => {
-          var match = true
-          if (queryMap.user_id !== null) {
-            match = match & (String(data.user_id).indexOf(queryMap.user_id) === 0)
-          }
-          if (queryMap.name !== '') {
-            match = match & (data.name.indexOf(queryMap.name) > -1)
-          }
-          if (queryMap.position !== '') {
-            match = match & (data.position.indexOf(queryMap.position) > -1)
-          }
-          if (queryMap.department_name !== '') {
-            match = match & (data.department_name.indexOf(queryMap.department_name) > -1)
-          }
-          return match
-        })
-      }
-      return this.tableData
-    }
-  },
   mounted() {
     this.getTableData()
     this.getDepartmentInfo()
@@ -386,9 +434,7 @@ export default {
       axios
         .post(
           APIUrl + '/api/employee',
-          {
-            data: {}
-          },
+          {},
           {
             headers: {
               'Content-Type': 'application/json'
@@ -400,6 +446,7 @@ export default {
             console.log('fail to get table data', response.data)
           } else {
             this.formatTableData(response.data.data.list)
+            this.pagination.total = response.data.data.count
           }
         })
         .catch((err) => {
@@ -441,7 +488,7 @@ export default {
             editData['new_' + key] = ageInt
             continue
           case 'join_time':
-            editData['new_' + key] = new Date(this.dialogData[key]+' 00:00:00').getTime() / 1000
+            editData['new_' + key] = new Date(this.dialogData[key] + ' 00:00:00').getTime() / 1000
             continue
         }
       }
@@ -766,6 +813,125 @@ export default {
         }
       }
       return posotionMap
+    },
+    set(scope) {
+      this.dialogType = 'edit'
+      this.dialogOldData = {}
+      this.dialogData = scope.row
+      for (const index in scope.row) {
+        this.dialogOldData[index] = scope.row[index]
+      }
+      this.dialogVisible = true
+    },
+    handleCurrentChange(val) {
+      this.pagination.currentPage = val
+    },
+    openSearchDialog() {
+      this.searchConditionData = []
+      this.addRootCondition()
+      this.searchDialogVisible = true
+    },
+    closeSearchDialog() {
+      this.searchDialogVisible = false
+    },
+    addRootCondition() {
+      if (this.searchConditionData[0] === undefined) {
+        this.searchConditionData[0] = [{ _id: '1', key: '', condition: '', value: '' }]
+      }
+    },
+    addCondition(node) {
+      if (node.data.children === undefined) {
+        this.$set(node.data, 'children', [])
+      }
+      node.data.children.push({ _id: uuidv4(), key: '', condition: '', value: '' })
+    },
+    delCondition(node) {
+      var newChildren = []
+      for (let index in node.parent.data.children) {
+        if (node.data._id !== node.parent.data.children[index]._id) {
+          newChildren.push(node.parent.data.children[index])
+        }
+      }
+      this.$set(node.parent.data, 'children', newChildren)
+    },
+    delAllCondition() {
+      this.searchConditionData = []
+      this.addRootCondition()
+    },
+    generateSearchObjectWrapper(obj, errObj) {
+      var child = {}
+      child.key = obj.key
+      child.condition = obj.condition
+      child.value = obj.value
+      if (obj.children !== undefined && typeof(obj.children) === 'object' && obj.children.length > 0 && obj.mode !== undefined && obj.mode !== null && obj.mode !== "") {
+        child.more = []
+        for (let index in obj.children) {
+          child.more.push(this.generateSearchObjectWrapper(obj.children[index], errObj))
+          if (errObj.err !== null) {
+            return
+          }
+        }
+        child.mode = obj.mode
+      }
+      return child
+    },
+    generateSearchObject() {
+      if (this.searchConditionData[0] === undefined) {
+        return "condition is null"
+      }
+      var errObj = {err: null}
+      var result = this.generateSearchObjectWrapper(this.searchConditionData[0], errObj)
+      if (errObj.err !== null) {
+        return errObj.err
+      }
+      return result
+    },
+    Search() {
+      var obj = this.generateSearchObject()
+      if (typeof(obj) === 'string') {
+        this.$notify({
+          title: '搜索失败',
+          message: obj,
+          type: 'error',
+          duration: 2000
+        })
+        return
+      }
+      var g = this
+      axios
+        .post(
+          APIUrl + '/api/employee',
+          {
+            query: obj
+          },
+          {
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          }
+        )
+        .then((response) => {
+          if (response.data.code !== 0) {
+            console.log('fail to get search table data', response.data)
+          } else {
+            var data = response.data.data.list
+            for (const index in data) {
+              if (data[index].join_time === undefined) {
+                continue
+              }
+              const timestamp = data[index].join_time
+              const date = new Date(timestamp * 1000)
+              const year = date.getFullYear()
+              const month = ('0' + (date.getMonth() + 1)).slice(-2)
+              const day = ('0' + date.getDate()).slice(-2)
+              data[index].join_time = `${year}-${month}-${day}`
+            }
+            g.searchResultTableData = data
+          }
+        })
+        .catch((err) => {
+          console.log('fail to get search table data', err)
+        })
     }
   },
   data() {
@@ -790,28 +956,77 @@ export default {
       dialogType: '',
       dialogOldData: {},
       dialogData: {},
-      expandMore: false, // 是否展开更多搜索条件
-      query: {
-        user_id: null,
-        name: '',
-        position: '',
-        department_name: ''
-      },
+      query: '',
       tableData: [],
       departmentTableData: [],
       preDelScope: null,
       deleteCheckBox: false,
       multiDeleteCheckBox: false,
       chooseData: [],
-      set: function(scope) {
-        this.dialogType = 'edit'
-        this.dialogOldData = {}
-        this.dialogData = scope.row
-        for (const index in scope.row) {
-          this.dialogOldData[index] = scope.row[index]
-        }
-        this.dialogVisible = true
+      pagination: {
+        currentPage: 1,
+        pageSize: 10,
+        total: 100,
+        layout: 'total,sizes,prev,pager,next,jumper'
+      },
+      searchDialogVisible: false,
+      searchTranslateMap: {
+        'name': '姓名',
+        'sex': '性别',
+        'age': '年龄',
+        'phone': '电话',
+        'email': '邮箱',
+        'position': '职位',
+        'marry': '婚姻状况',
+        'education': '学历',
+        'department_name': '部门名',
+      },
+      searchConditions: {
+        '>': '大于',
+        '<': '小于',
+        '=': '等于',
+        '!=': '不等于',
+        'like': '匹配',
+        'not like': '不匹配',
+      },
+      searchConditionData: [],
+      searchResultTableData: []
+    }
+  },
+  computed: {
+    ...mapGetters(['name']),
+    inputTableData() {
+      var query = this.query
+      var departmentTableData = this.departmentTableData
+      var tableData = this.tableData
+      var pagination = this.pagination
+      if (query !== '') {
+        tableData = tableData.filter(data => {
+          for (const key in data) {
+            if (key === 'department_id') {
+              for (const index in departmentTableData) {
+                if (departmentTableData[index].department_id === data[key]) {
+                  if (departmentTableData[index].department_name.indexOf(query) > -1) {
+                    return true
+                  }
+                }
+              }
+            } else {
+              if (String(data[key]).indexOf(query) > -1) {
+                return true
+              }
+            }
+          }
+        })
+        this.pagination.currentPage = 1
+        this.pagination.total = tableData.length
       }
+      if (pagination.currentPage > 0) {
+        tableData = tableData.filter((item, index) => {
+          return (index >= (pagination.currentPage - 1) * 10) && (index < pagination.currentPage * 10)
+        })
+      }
+      return tableData
     }
   }
 }
@@ -826,5 +1041,27 @@ export default {
     font-size: 30px;
     line-height: 46px;
   }
+}
+</style>
+
+<style>
+.custom-tree-node {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 16px;
+  padding-right: 8px;
+}
+
+.el-tree-node__content {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  height: 35px;
+  cursor: pointer;
 }
 </style>
